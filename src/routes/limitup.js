@@ -7,4 +7,6 @@ router.get('/', limitup.getLimit)
 
 router.get('/by-num', limitup.getLimitByNum)
 
+router.get('/winners-list', limitup.getWinnersList)
+
 module.exports = router
