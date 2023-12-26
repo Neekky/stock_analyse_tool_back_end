@@ -10,6 +10,49 @@ const {
 const axios = require('axios');
 
 class LimitupCtl {
+
+  async getEarlyLimit(ctx) {
+    try {
+      const {
+        date = ''
+      } = ctx.query;
+
+      if (!date) {
+        ctx.body = new ErrorModel({
+          msg: "需要传交易日期",
+          code: 404,
+        });
+      }
+
+      const response = await axios.get('http://127.0.0.1:8000/get_early_strategy_data?start_date=' + date);
+      
+      const data = response.data
+
+      data.forEach(ele => {
+        ele[`集合竞价评级`] = ele[`集合竞价评级[${date}]`];
+        ele[`竞价异动类型`] = ele[`竞价异动类型[${date}]`];
+        ele[`竞价异动说明`] = ele[`竞价异动说明[${date}]`];
+        ele[`竞价异动原因`] = ele[`竞价异动类型`] + '：' + ele[`竞价异动说明`];
+        ele[`竞价涨幅`] = ele[`竞价涨幅[${date}]`] ;
+
+        delete ele[`竞价涨幅[${date}]`];
+        delete ele[`竞价异动类型[${date}]`];
+        delete ele[`竞价异动说明[${date}]`];
+        delete ele[`集合竞价评级[${date}]`];
+      })
+      
+      ctx.body = new SuccessModel({
+        data: data,
+        msg: "查询成功",
+      });
+
+    } catch (error) {
+      ctx.body = {
+        code: 500,
+        msg: error
+      };
+    }
+  }
   async getLimit(ctx) {
     try {
       const {
