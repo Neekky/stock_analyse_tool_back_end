@@ -47,10 +47,10 @@ class LimitupCtl {
       });
 
     } catch (error) {
-      ctx.body = {
-        code: 500,
-        msg: error
-      };
+       ctx.body = new ErrorModel({
+          msg: error || "查询失败",
+          code: 500,
+        });
     }
   }
   async getLimit(ctx) {
@@ -100,10 +100,10 @@ class LimitupCtl {
         msg: "查询成功",
       });
     } catch (error) {
-      ctx.body = {
+      ctx.body = new ErrorModel({
+        msg: error || "查询失败",
         code: 500,
-        msg: error
-      };
+      });
     }
   }
 
@@ -145,10 +145,10 @@ class LimitupCtl {
       }
 
       if (!queryNum) {
-        ctx.body = {
+        ctx.body = new ErrorModel({
+          msg: "没传递num参数",
           code: 500,
-          msg: '没传递num参数'
-        };
+        });
       }
 
       const reqPath = `${crawlPath}/每日涨停/${date}/${queryNum}.csv`
@@ -192,10 +192,10 @@ class LimitupCtl {
         msg: "查询成功",
       });
     } catch (error) {
-      ctx.body = {
-        code: 500,
-        msg: error
-      };
+       ctx.body = new ErrorModel({
+          msg: error || "查询失败",
+          code: 500,
+        });
     }
   }
 
@@ -227,10 +227,10 @@ class LimitupCtl {
         msg: "查询成功",
       });
     } catch (error) {
-      ctx.body = {
+      ctx.body = new ErrorModel({
+        msg: error || "查询失败",
         code: 500,
-        msg: error
-      };
+      });
     }
   }
 
