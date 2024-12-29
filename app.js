@@ -10,6 +10,7 @@ const cors = require("koa2-cors");
 const index = require('./src/routes/index')
 const users = require('./src/routes/users')
 const limitup = require('./src/routes/limitup')
+const thirdApi = require('./src/routes/thirdApi')
 
 
 // 处理CORS
@@ -42,7 +43,7 @@ app.use(async (ctx, next) => {
 app.use(index.routes(), index.allowedMethods())
 app.use(users.routes(), users.allowedMethods())
 app.use(limitup.routes(), limitup.allowedMethods())
-
+app.use(thirdApi.routes(), thirdApi.allowedMethods())
 
 // error-handling
 app.on('error', (err, ctx) => {

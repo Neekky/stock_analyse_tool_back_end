@@ -11,5 +11,4 @@ router.get('/winners-list', limitup.getWinnersList)
 
 router.get('/early-limit-list', limitup.getEarlyLimit)
 
-
 module.exports = router
