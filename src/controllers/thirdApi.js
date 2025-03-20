@@ -4,6 +4,75 @@ const { crawlPath } = require("../config");
 const axios = require("axios");
 const dayjs = require("dayjs");
 
+// 辅助方法，用于请求金十快讯数据
+const jin10FlashNewsRequest = async (ctx, maxTime = "") => {
+  try {
+    const { hot = "热,沸,爆", channel = "1,5" } = ctx.query;
+    const results = [];
+    let filterRes = [];
+    const timestamp = Date.now() + "";
+
+    // 小参数
+    const smallParams = {
+      hot: hot.split(","),
+      channel: channel.split(",").map(Number),
+    };
+
+    if (maxTime) {
+      smallParams.max_time = maxTime;
+    }
+    const response = await axios.get(
+      "https://3318fc142ea545eab931e22a61ec6e5c.z3c.jin10.com/flash",
+      {
+        params: {
+          params: JSON.stringify(smallParams),
+          t: timestamp,
+        },
+        headers: {
+          Accept: "*/*",
+          "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
+          "User-Agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+          Origin: "https://www.jin10.com",
+          Referer: "https://www.jin10.com/",
+          "x-app-id": "bVBF4FyRTn5NJF5n",
+          "x-version": "1.0",
+        },
+        timeout: 10000,
+      }
+    );
+
+    if (response.data?.status === 200) {
+      const data = response?.data?.data || [];
+      // 转换数据
+      data?.forEach((ele) => {
+        const create_time = ele.create_time;
+        if (
+          ele.important === 1 &&
+          ele.type === 0 &&
+          dayjs(create_time).isSame(dayjs(), "day") &&
+          ele?.data?.content
+        ) {
+          results.push(sanitizeHTMLText(ele?.data?.content || ""));
+        }
+      });
+
+      // 过滤非必要数据，例如未来事件列表
+      filterRes = results.filter((ele) => {
+        // 去除内容包含 今日重点关注的财经数据与事件 的数据
+        if (ele.includes("今日重点关注的财经数据与事件")) {
+          return false;
+        }
+        return true;
+      });
+    }
+    return filterRes;
+  } catch (error) {
+    console.log("请求金十数据报错", error);
+    return [];
+  }
+}
+
 class ThirdApiCtl {
   async getInflowPlate(ctx) {
     try {
@@ -136,47 +205,17 @@ class ThirdApiCtl {
 
   async getJin10News(ctx) {
     try {
-      const { hot = "爆", channel = "1,5" } = ctx.query;
-      const results = [];
+      let res1 = [];
+      let res2 = [];
+      // 第一次请求
+      res1 = await jin10FlashNewsRequest(ctx);
 
-      const timestamp = Date.now() + "";
-      const response = await axios.get(
-        "https://3318fc142ea545eab931e22a61ec6e5c.z3c.jin10.com/flash",
-        {
-          params: {
-            params: JSON.stringify({
-              hot: hot.split(","),
-              channel: channel.split(",").map(Number),
-            }),
-            t: timestamp,
-          },
-          headers: {
-            Accept: "*/*",
-            "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
-            "User-Agent":
-              "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-            Origin: "https://www.jin10.com",
-            Referer: "https://www.jin10.com/",
-            "x-app-id": "bVBF4FyRTn5NJF5n",
-            "x-version": "1.0",
-          },
-          timeout: 10000,
-        }
-      );
-
-      if (response.data?.status === 200) {
-        const data = response?.data?.data || [];
-        // 转换数据
-        console.log(data, 213231132)
-        data?.forEach(ele => {
-          const create_time = ele.create_time
-          if (ele.important === 1 && dayjs(create_time).isSame(dayjs(), 'day') && ele?.data?.content) {
-            results.push(sanitizeHTMLText(ele?.data?.content || ''))
-          }
-        });
-
+      if (res1.length > 0) {
+        const time = res1[res1.length - 1]?.time;
+        res2 = await jin10FlashNewsRequest(ctx, time);
       }
 
+      const results = [...res1, ...res2];
       ctx.body = new SuccessModel({
         data: results,
         msg: "查询成功",
