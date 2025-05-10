@@ -41,9 +41,10 @@ const jin10FlashNewsRequest = async (ctx, maxTime = "") => {
         timeout: 10000,
       }
     );
+    
+    const data = response?.data?.data || [];
 
     if (response.data?.status === 200) {
-      const data = response?.data?.data || [];
       // 转换数据
       data?.forEach((ele) => {
         const create_time = ele.create_time;
@@ -53,6 +54,7 @@ const jin10FlashNewsRequest = async (ctx, maxTime = "") => {
           dayjs(create_time).isSame(dayjs(), "day") &&
           ele?.data?.content
         ) {
+          console.log("ele", ele);
           results.push(sanitizeHTMLText(ele?.data?.content || ""));
         }
       });
@@ -66,10 +68,16 @@ const jin10FlashNewsRequest = async (ctx, maxTime = "") => {
         return true;
       });
     }
-    return filterRes;
+    return {
+      time: data[data.length - 1]?.time || "",
+      data: filterRes,
+    };
   } catch (error) {
     console.log("请求金十数据报错", error);
-    return [];
+    return {
+      time: "",
+      data: [],
+    };
   }
 }
 
@@ -209,13 +217,13 @@ class ThirdApiCtl {
       let res2 = [];
       // 第一次请求
       res1 = await jin10FlashNewsRequest(ctx);
-
-      if (res1.length > 0) {
-        const time = res1[res1.length - 1]?.time;
+      console.log("res1111111", res1);
+      if (res1?.data?.length > 0) {
+        const time = res1?.time;
         res2 = await jin10FlashNewsRequest(ctx, time);
       }
 
-      const results = [...res1, ...res2];
+      const results = [...res1?.data, ...res2.data];
       ctx.body = new SuccessModel({
         data: results,
         msg: "查询成功",
