@@ -41,7 +41,7 @@ const jin10FlashNewsRequest = async (ctx, maxTime = "") => {
         timeout: 10000,
       }
     );
-    
+
     const data = response?.data?.data || [];
 
     if (response.data?.status === 200) {
@@ -54,7 +54,6 @@ const jin10FlashNewsRequest = async (ctx, maxTime = "") => {
           dayjs(create_time).isSame(dayjs(), "day") &&
           ele?.data?.content
         ) {
-          console.log("ele", ele);
           results.push(sanitizeHTMLText(ele?.data?.content || ""));
         }
       });
@@ -217,7 +216,7 @@ class ThirdApiCtl {
       let res2 = [];
       // 第一次请求
       res1 = await jin10FlashNewsRequest(ctx);
-      console.log("res1111111", res1);
+
       if (res1?.data?.length > 0) {
         const time = res1?.time;
         res2 = await jin10FlashNewsRequest(ctx, time);
