@@ -19,6 +19,7 @@ app.use(
       const allowedOrigins = [
         "http://127.0.0.1:8100",
         "https://www.mfuture.fun",
+        "https://mfuture.fun",
       ];
       const requestOrigin = ctx.get("Origin");
 
