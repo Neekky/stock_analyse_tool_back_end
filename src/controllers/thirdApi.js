@@ -212,23 +212,39 @@ class ThirdApiCtl {
 
   async getJin10News(ctx) {
     try {
-      let res1 = [];
-      let res2 = [];
-      // 第一次请求
-      res1 = await jin10FlashNewsRequest(ctx);
-
-      if (res1?.data?.length > 0) {
-        const time = res1?.time;
-        res2 = await jin10FlashNewsRequest(ctx, time);
+      const { maxQueryCount = 3 } = ctx.query; // 默认最多查询3次
+      const maxCount = parseInt(maxQueryCount, 10);
+      
+      let allResults = [];
+      let lastTime = "";
+      let queryCount = 0;
+      let hasMoreData = true;
+      
+      // 循环查询，直到没有更多数据或达到最大查询次数
+      while (hasMoreData && queryCount < maxCount) {
+        // 使用上一次请求返回的时间作为下一次请求的参数
+        const response = await jin10FlashNewsRequest(ctx, lastTime);
+        queryCount++;
+        // 合并数据
+        if (response?.data?.length > 0) {
+          allResults = [...allResults, ...response.data];
+          lastTime = response.time; // 更新时间戳用于下一次请求
+        } else {
+          hasMoreData = false; // 没有更多数据，退出循环
+        }
+        
+        // 如果没有返回时间或时间为空，也认为没有更多数据
+        if (!lastTime) {
+          hasMoreData = false;
+        }
       }
-
-      const results = [...res1?.data, ...res2.data];
+      
       ctx.body = new SuccessModel({
-        data: results,
-        msg: "查询成功",
+        data: allResults,
+        msg: "查询成功，实际查询次数：" + queryCount,
       });
     } catch (error) {
-      console.error("Interest Rate API Error:", {
+      console.error("Jin10 News API Error:", { // 修正错误日志信息
         message: error.message,
         response: error.response?.data,
         status: error.response?.status,
