@@ -7,7 +7,7 @@ const dayjs = require("dayjs");
 // 辅助方法，用于请求金十快讯数据
 const jin10FlashNewsRequest = async (ctx, maxTime = "") => {
   try {
-    const { hot = "热,沸,爆", channel = "1,5" } = ctx.query;
+    const { hot = "火,热,沸,爆", channel = "1,5" } = ctx.query;
     const results = [];
     let filterRes = [];
     const timestamp = Date.now() + "";
