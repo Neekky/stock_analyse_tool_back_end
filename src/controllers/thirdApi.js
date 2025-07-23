@@ -88,7 +88,7 @@ class ThirdApiCtl {
         {
           headers: {
             Cookie:
-              "hxmPid=adm_wapzxdingbubanner_394400;v=AzzX37KsdVEgM0EN8mJYwBBTC9HrNeBfYtn0Ixa9SCcK4dLPPkWw77LpxLpl;_ga=GA1.1.634807058.1722318186;_ga_KQBDS1VPQF=GS1.1.1732081176.2.1.1732081200.0.0.0",
+              "__utma=156575163.862681556.1735481875.1735481875.1735481875.1; Hm_lvt_722143063e4892925903024537075d0d=1735138891,1735484336,1736170188; Hm_lvt_929f8b362150b1f77b477230541dbbc2=1735138891,1735484336,1736170188; Hm_lvt_78c58f01938e4d85eaf619eae71b4ed1=1735481875,1736170188; v=AzrVWst3Cchc7YUkNSMlS5IFjWtZ677FMG8yaUQz5k2YN9TVLHsO1QD_glEX",
             Referer: "https://eq.10jqka.com.cn/",
             Host: "eq.10jqka.com.cn",
             "User-Agent":
@@ -116,7 +116,7 @@ class ThirdApiCtl {
         {
           headers: {
             Cookie:
-              "hxmPid=adm_wapzxdingbubanner_394400;v=AzzX37KsdVEgM0EN8mJYwBBTC9HrNeBfYtn0Ixa9SCcK4dLPPkWw77LpxLpl;_ga=GA1.1.634807058.1722318186;_ga_KQBDS1VPQF=GS1.1.1732081176.2.1.1732081200.0.0.0",
+              "__utma=156575163.862681556.1735481875.1735481875.1735481875.1; Hm_lvt_722143063e4892925903024537075d0d=1735138891,1735484336,1736170188; Hm_lvt_929f8b362150b1f77b477230541dbbc2=1735138891,1735484336,1736170188; Hm_lvt_78c58f01938e4d85eaf619eae71b4ed1=1735481875,1736170188; v=AzrVWst3Cchc7YUkNSMlS5IFjWtZ677FMG8yaUQz5k2YN9TVLHsO1QD_glEX",
             Referer: "https://eq.10jqka.com.cn/",
             Host: "eq.10jqka.com.cn",
             "User-Agent":
