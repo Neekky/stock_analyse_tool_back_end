@@ -3,6 +3,8 @@ const iconv = require("iconv-lite");
 const { crawlPath } = require("../config");
 const axios = require("axios");
 const dayjs = require("dayjs");
+const fs = require("fs");
+const path = require("path");
 
 // 辅助方法，用于请求金十快讯数据
 const jin10FlashNewsRequest = async (ctx, maxTime = "") => {
@@ -140,6 +142,45 @@ class ThirdApiCtl {
   async getInterestRate(ctx) {
     try {
       const { attr_id = "24", name = "利率" } = ctx.query;
+      
+      // 定义名称到文件的映射关系
+      const nameToFileMap = {
+        "中国CPI年率": "中国CPI年率interestRate.json",
+        "中国CPI月率": "中国CPI月率interestRate.json", 
+        "中国PPI年率": "中国PPI年率interestRate.json",
+        "中国制造业PMI": "中国制造业PMIinterestRate.json"
+      };
+      
+      // 优先从本地文件获取数据
+      if (nameToFileMap[name]) {
+        const fileName = nameToFileMap[name];
+        const filePath = path.join(__dirname, '../data', fileName);
+        
+        try {
+          // 检查文件是否存在
+          if (fs.existsSync(filePath)) {
+            const fileData = fs.readFileSync(filePath, 'utf8');
+            const jsonData = JSON.parse(fileData);
+            
+            // 按日期排序
+            const sortedResults = jsonData.sort(
+              (a, b) => new Date(a.日期) - new Date(b.日期)
+            );
+            
+            ctx.body = new SuccessModel({
+              data: sortedResults,
+              msg: "从本地文件查询成功",
+              source: "local"
+            });
+            return;
+          }
+        } catch (fileError) {
+          console.warn(`读取本地文件失败，将使用API查询: ${fileError.message}`);
+          // 文件读取失败，继续使用API查询
+        }
+      }
+      
+      // 如果本地文件不存在或读取失败，使用API查询
       const results = [];
       let maxDate = "";
 
@@ -194,7 +235,8 @@ class ThirdApiCtl {
 
       ctx.body = new SuccessModel({
         data: sortedResults,
-        msg: "查询成功",
+        msg: "从API查询成功",
+        source: "api"
       });
     } catch (error) {
       console.error("Interest Rate API Error:", {
