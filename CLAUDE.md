@@ -1,58 +1,58 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+本文件为 Claude Code (claude.ai/code) 提供本代码仓库的工作指导。
 
-## Commands
+## 命令
 
 ```bash
-pnpm dev        # development with nodemon auto-restart (port 8200)
-pnpm start      # production start via node
-pnpm prd        # production start via PM2 (process name: stock_analyse_end_server)
+pnpm dev        # 开发模式，使用 nodemon 自动重启（端口 8200）
+pnpm start      # 生产模式，通过 node 启动
+pnpm prd        # 生产模式，通过 PM2 启动（进程名：stock_analyse_end_server）
 ```
 
-## Architecture
+## 架构
 
-This is a **Koa 2 BFF (Backend for Frontend)** for a Chinese stock analysis tool. It aggregates data from multiple sources and serves the frontend at `mfuture.fun`.
+这是一个用于中国股票分析工具的 **Koa 2 BFF（Backend for Frontend）**。它聚合多个数据源的数据，并为前端 `mfuture.fun` 提供服务。
 
-### Request Flow
+### 请求流程
 
 ```
-Frontend (mfuture.fun:8100)
-  → Koa server (port 8200)
-      → /limitup/*      → local Python service (port 8000) via axios
-      → /limitup/by-num → local CSV files at ../../stock_analyse_tool_data_crawl/database/
-      → /thirdApi/interest_rate → src/data/ JSON cache, or Jin10 API
-      → /thirdApi/flash_news   → Jin10 flash news API
-      → /thirdApi/*_plate      → Tonghuashun (10jqka.com.cn) scraping
+前端 (mfuture.fun:8100)
+  → Koa 服务器 (端口 8200)
+      → /limitup/*      → 本地 Python 服务（端口 8000）通过 axios
+      → /limitup/by-num → 本地 CSV 文件位于 ../../stock_analyse_tool_data_crawl/database/
+      → /thirdApi/interest_rate → src/data/ JSON 缓存，或金十数据 API
+      → /thirdApi/flash_news   → 金十数据快讯 API
+      → /thirdApi/*_plate      → 同花顺（10jqka.com.cn）数据爬取
 ```
 
-### Key Files
+### 关键文件
 
-- `app.js` — Koa app factory: mounts middleware stack and all routers
-- `src/config.js` — filesystem paths for sibling data directories (`rootPath`, `crawlPath`)
-- `src/routes/` — route definitions (limitup.js, thirdApi.js)
-- `src/controllers/` — business logic (limitup.js, thirdApi.js)
-- `src/models/resModel.js` — `SuccessModel` / `ErrorModel` response wrappers used by all controllers
-- `src/data/` — locally cached JSON for Chinese macro indicators (CPI/PPI/PMI); updated manually via git commits
+- `app.js` — Koa 应用工厂：挂载中间件栈和所有路由
+- `src/config.js` — 同级数据目录的文件系统路径（`rootPath`、`crawlPath`）
+- `src/routes/` — 路由定义（limitup.js、thirdApi.js）
+- `src/controllers/` — 业务逻辑（limitup.js、thirdApi.js）
+- `src/models/resModel.js` — 所有控制器使用的 `SuccessModel` / `ErrorModel` 响应包装器
+- `src/data/` — 中国宏观经济指标（CPI/PPI/PMI）的本地缓存 JSON；通过 git 提交手动更新
 
-### CORS Whitelist
+### CORS 白名单
 
-Configured in `app.js`: `http://127.0.0.1:8100`, `https://www.mfuture.fun`, `https://mfuture.fun`.
+在 `app.js` 中配置：`http://127.0.0.1:8100`、`https://www.mfuture.fun`、`https://mfuture.fun`。
 
-### External Dependencies
+### 外部依赖
 
-- **Python service on port 8000** — must be running for `/limitup/` endpoints (except `/limitup/by-num`)
-- **Sibling directory** `../../stock_analyse_tool_data_crawl/database/` — CSV stock data files read by `getLimitByNum`
-- **Tonghuashun scraping** — uses a hardcoded `Cookie` header in `src/controllers/thirdApi.js` that will expire
+- **端口 8000 的 Python 服务** — `/limitup/` 端点必须运行（`/limitup/by-num` 除外）
+- **同级目录** `../../stock_analyse_tool_data_crawl/database/` — `getLimitByNum` 读取的 CSV 股票数据文件
+- **同花顺数据爬取** — 使用 `src/controllers/thirdApi.js` 中硬编码的 `Cookie` 请求头，该 Cookie 会过期
 
-### Response Conventions
+### 响应规范
 
-All API responses use `SuccessModel` / `ErrorModel` from `src/models/resModel.js`:
+所有 API 响应都使用 `src/models/resModel.js` 中的 `SuccessModel` / `ErrorModel`：
 ```js
 { errno: 0, data: ..., msg: 'success' }   // SuccessModel
 { errno: -1, msg: '...' }                 // ErrorModel
 ```
 
-### Deployment
+### 部署
 
-Push to `master` → GitHub Actions SSHs into server → `git pull && pnpm install && pm2 restart stock_analyse_end_server`.
+推送到 `master` → GitHub Actions 通过 SSH 登录服务器 → `git pull && pnpm install && pm2 restart stock_analyse_end_server`。
