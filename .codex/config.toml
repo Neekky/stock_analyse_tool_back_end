@@ -1,0 +1,5 @@
+[mcp_servers.context7]
+url = "https://mcp.context7.com/mcp"
+
+[mcp_servers.context7.http_headers]
+CONTEXT7_API_KEY = "ctx7sk-29829e37-4532-4388-8ec2-4d2d3125236c"
